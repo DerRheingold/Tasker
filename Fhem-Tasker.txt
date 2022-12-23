@@ -1,0 +1,24 @@
+## Logik die bei bestimmten Situationen das Tablet an bzw. aus schaltet ##
+define di_Tablet_Logik DOIF ([GeoStatus:state] eq "Daheim" and [Shelly_Plug_TV:Power] < 50 and [?5:30-22:00])\
+	(set Tablet_Schalter on)\
+DOELSEIF ([?5:30-22:00])\
+	(set Tablet_Schalter on)\
+	\
+DOELSEIF ([Shelly_Plug_TV:Power] > 50 )\
+	(set Tablet_Schalter off)\
+DOELSEIF ([GeoStatus:state] ne "Daheim")\
+	(set Tablet_Schalter off)\
+DOELSEIF ([?22:00-05:00])\
+	(set Tablet_Schalter off)
+
+## Schalter für die Tabletsteuerung ##
+define Tablet_Schalter dummy
+attr Tablet_Schalter setList on off
+attr Tablet_Schalter useSetExtensions 1
+attr Tablet_Schalter webCmd toggle:on:off
+
+## Logik die je nach Status von Tablet_Schalter eine Pushnachricht an das Gerät sendet ##
+define di_Tablet_Schalter DOIF ([Tablet_Schalter] eq "on")	\
+(set pushmsg msg title='Tablet' 'Einschalten' device='tablet')\
+DOELSEIF ([Tablet_Schalter] eq "off")\
+(set pushmsg msg title='Tablet' 'Aus' device='tablet')
